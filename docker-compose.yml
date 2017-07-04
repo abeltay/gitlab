@@ -18,7 +18,7 @@ services:
 
   gitlab:
     restart: always
-    image: sameersbn/gitlab:9.2.7
+    image: sameersbn/gitlab:9.3.2
     depends_on:
     - redis
     - postgres
