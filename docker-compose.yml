@@ -1,46 +1,25 @@
 version: '3'
 services:
-  redis:
-    restart: always
-    image: redis:4-alpine
-    volumes:
-    - redis:/data
-
-  postgres:
-    restart: always
-    image: postgres:9.6-alpine
-    volumes:
-    - /srv/docker/postgres:/var/lib/postgresql/data
-    environment:
-    - POSTGRES_USER=gitlab
-    - POSTGRES_PASSWORD=password
-    - POSTGRES_DB=gitlabhq_production
-
   gitlab:
+    image: gitlab/gitlab-ce
     restart: always
-    image: sameersbn/gitlab:9.4.5
-    depends_on:
-    - redis
-    - postgres
     ports:
     - '80:80'
-    - '10022:22'
+    - '443:443'
+    - '22:22'
     volumes:
-    - /srv/docker/gitlab:/home/git/data:Z
-    env_file: gitlab.env
+    - /srv/gitlab/config:/etc/gitlab
+    - /srv/gitlab/data:/var/opt/gitlab
+    - log:/var/log/gitlab
 
   gitlab-runner:
+    image: gitlab/gitlab-runner:alpine
     restart: always
-    image: moexmen/gitlab-runner
     volumes:
     - /var/run/docker.sock:/var/run/docker.sock
     - /srv/gitlab-runner/config:/etc/gitlab-runner
-
-    # The following folders need to have 100 as an owner,
-    # which maps to the gitlab-runner user in the container.
-    # Otherwise won't be able to ssh/(pull/push docker images)
-    - /srv/gitlab-runner/docker:/home/gitlab-runner/.docker
-    - /srv/gitlab-runner/ssh:/home/gitlab-runner/.ssh
+    - runner:/home/gitlab-runner
 
 volumes:
-  redis: {}
+  log: {}
+  runner: {}
